@@ -8,7 +8,7 @@ from io import StringIO
 print("--- 1. Loading and Preparing Data ---\n")
 
 # NOTE: In a live environment, these would be direct file reads.
-# Here, we use placeholder snippets to represent the data loading.
+# Here, i use placeholder snippets to represent the data loading.
 
 # Function to simulate loading CSV data from snippets (replace with pd.read_csv in a real setup)
 def load_data(filename):
