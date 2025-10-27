@@ -1,3 +1,14 @@
+#import os
+#for file in os.listdir():
+#    if file.endswith('.csv'):
+#        os.remove(file)
+#print("All CSV files deleted.")
+
+
+#from google.colab import files
+#uploaded = files.upload()  # Select ALL your CSV files at once
+
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -50,3 +61,40 @@ create_plot('Account Status Distribution', lambda: df_cust['Status'].value_count
 sns.boxplot(x='Account_Type', y='Balance', data=df_cust)
 plt.title('Account Balance Distribution by Type')
 plt.show()
+
+# --- Transaction Analysis ---
+create_plot('Total Transaction Volume by Type', lambda: df_txn.groupby('Type')['Amount'].sum().sort_values(ascending=False))
+txn_monthly_volume = df_txn.set_index('Date').resample('M')['Amount'].sum()
+create_plot('Monthly Transaction Volume (2023)', lambda: txn_monthly_volume, kind='line', rotation=45, figsize=(10, 6))
+
+# --- Loan Application Insights ---
+loan_summary = df_loan.groupby('Loan_Type')['Status'].value_counts(normalize=True).mul(100).unstack(fill_value=0)
+loan_summary['Approval_Rate'] = loan_summary.get('Approved', 0)
+loan_summary = loan_summary.sort_values(by='Approval_Rate', ascending=False)['Approval_Rate']
+create_plot('Loan Approval Rate by Loan Type', lambda: loan_summary)
+
+# --- Credit Card Usage ---
+create_plot('Total Credit Card Spend by Category', lambda: df_cc_usage.groupby('Category')['Amount'].sum().sort_values(ascending=False), rotation=45)
+monthly_spend = df_cc_usage.set_index('Date').resample('M')['Amount'].sum()
+create_plot('Monthly Credit Card Spend (2023)', lambda: monthly_spend, kind='line', rotation=45, figsize=(10, 6))
+
+# --- Branch Performance ---
+df_branch['Profit'] = df_branch['Revenue'] - df_branch['Expenses']
+branch_profit = df_branch.groupby('Branch')['Profit'].mean().sort_values(ascending=False)
+create_plot('Average Monthly Profit by Branch', lambda: branch_profit)
+
+df_branch['YearMonth'] = df_branch['YearMonth'].astype(str)
+sns.lineplot(x='YearMonth', y='Profit', hue='Branch', data=df_branch, marker='o')
+plt.title('Monthly Profit Trend by Branch (2023)')
+plt.xticks(rotation=45)
+plt.show()
+
+
+# --- Fraud Reports ---
+print("\nFraud Report Status Distribution:")
+print(df_fraud['Status'].value_counts(normalize=True).mul(100))
+create_plot('Distribution of Fraud Report Types', lambda: df_fraud['Type'].value_counts(), kind='pie')
+fraud_monthly_count = df_fraud.set_index('Date').resample('M')['Report_ID'].count()
+create_plot('Monthly Fraud Report Count (2023)', lambda: fraud_monthly_count, kind='line', rotation=45, figsize=(10, 6))
+
+print("\n--- EDA Complete ---\n")
